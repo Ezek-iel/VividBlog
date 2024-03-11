@@ -1,0 +1,314 @@
+openapi: 3.0.0
+info:
+  title: Vividblog API
+  version: 1.0.0
+  description: API documentation for Vividblog built with Flask-RESTful and React
+servers:
+  - url: /api/v1
+paths:
+  /blogs:
+    get:
+      summary: Retrieve all blogs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blogs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Blog'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      summary: Add a new blog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blog:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      written_by:
+                        type: string
+                      created_at:
+                        type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /blogs/{blogId}:
+    get:
+      summary: Get a particular blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+    put:
+      summary: Update a particular blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blog:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      written_by:
+                        type: string
+                      updated_at:
+                        type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a particular blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog to delete
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /blogs/{blogId}/comments:
+    get:
+      summary: Get all comments for a blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog to retrieve comments for
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blog:
+                    type: string
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Add a new comment to a blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog to add a comment to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /blogs/{blogId}/comments/{commentId}:
+    delete:
+      summary: Delete a comment from a blog
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: ID of the blog containing the comment
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+          description: ID of the comment to delete
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Blog:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        comments:
+          type: string
+        likes:
+          type: integer
+    BlogRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        author_id:
+          type: string
+    Comment:
+      type: object
+      properties:
+        message:
+          type: string
+        author:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CommentRequest:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            blog:
+              type: string
+            message:
+              type: string
+            author:
+              type: string
+    Error:
+      type: object
+      properties:
+
+
+        message:
+          type: string
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
