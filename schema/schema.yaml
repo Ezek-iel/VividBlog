@@ -1,314 +1,388 @@
 openapi: 3.0.0
 info:
-  title: Vividblog API
+  title: VividBlog API
+  description: A Blogging API using flask
+  contact:
+    name: Ezekiel
+    url: 'https://www.github.com/Ezek-iel'
+    email: ezekielakinfenwa98@gmail.com
   version: 1.0.0
-  description: API documentation for Vividblog built with Flask-RESTful and React
 servers:
-  - url: /api/v1
+  - url: 'http://127.0.0.1:5000/api/v1'
+    description: base server url
+tags:
+  - name: users
+    description: Operations related to users
+  - name: blogs
+    description: Operations related to blogs
 paths:
   /blogs:
     get:
-      summary: Retrieve all blogs
+      tags:
+        - blogs
+      description: Get all blogs
+      operationId: GetBlogs
       responses:
         '200':
-          description: OK
+          description: A list of blogs
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  blogs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Blog'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/BlogListSchema'
+        '404':
+           description: requested resource was not found
+           content:
+             application/json:
+               schema:
+                 $ref: "#/components/schemas/Error"     
     post:
-      summary: Add a new blog
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlogRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  blog:
-                    type: object
-                    properties:
-                      url:
-                        type: string
-                      written_by:
-                        type: string
-                      created_at:
-                        type: string
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /blogs/{blogId}:
+       tags:
+       -  blogs
+       description: Add A new Blog
+       operationId: AddBlog
+       requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/CreateUserSchema'
+       responses:
+         '200':
+           description: Operation Succesful
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Success' 
+  /blog/{blogId}:
     get:
-      summary: Get a particular blog
+      tags:
+        - blogs
+      description: 'Gets a particular blog'
+      operationId: getBlog
+      
       parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog to retrieve
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Blog'
-    put:
-      summary: Update a particular blog
-      parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog to update
-      requestBody:
+      - name: blogId
+        in: path
+        description: id of the blog to get
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlogRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  blog:
-                    type: object
-                    properties:
-                      url:
-                        type: string
-                      written_by:
-                        type: string
-                      updated_at:
-                        type: string
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      summary: Delete a particular blog
-      parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog to delete
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessMessage'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /blogs/{blogId}/comments:
-    get:
-      summary: Get all comments for a blog
-      parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog to retrieve comments for
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  blog:
-                    type: string
-                  comments:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Comment'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Add a new comment to a blog
-      parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog to add a comment to
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CommentRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessMessage'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /blogs/{blogId}/comments/{commentId}:
-    delete:
-      summary: Delete a comment from a blog
-      parameters:
-        - in: path
-          name: blogId
-          required: true
-          schema:
-            type: string
-          description: ID of the blog containing the comment
-        - in: path
-          name: commentId
-          required: true
-          schema:
-            type: string
-          description: ID of the comment to delete
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessMessage'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-components:
-  schemas:
-    Blog:
-      type: object
-      properties:
-        id:
+        schema:
           type: string
+      responses:
+        '200':
+          description: 'Successful Operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogItemSchema'
+        '404':
+          description: 'Resource Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags: 
+       - blogs
+      description: Updates a particular blog
+      operationId: updateBlog
+      
+      parameters:
+      - name: blogId
+        in: path
+        description: id of the blog to get
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogSchema'
+      responses:
+        '200':
+          description: 'Successful Operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '404':
+          description: 'Resource Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+         - blogs
+      parameters:
+      - name: blogId
+        in: path
+        description: id of the blog to get
+        required: true
+        schema:
+          type: string
+      description: 'Delete a particular blog'
+      operationId: deleteBlog
+      responses:
+        '200':
+           description: 'Successful Operation'
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Success'
+        '404':
+           description: 'Resource Not Found'
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Error'    
+         
+        
+  /users:
+    get:
+      tags:
+        - users
+      description: get all users
+      operationId: getUsers
+      
+      responses:
+        '200':
+          description: 'Succesful Operation'
+          content:
+            application/json:
+             schema:
+               $ref: '#/components/schemas/UserListSchema'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - users
+      description: add a user
+      operationId: addUser
+    
+      responses:
+        '200':
+          description: 'Succesful Operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+  /user/{userId}:
+    get:
+      tags:
+        - users
+      description: get a particular user
+      operationId: getUser
+      
+      parameters:
+      - name: userId
+        in: path
+        description: id of the user to get
+        required: true
+        schema:
+          type: string
+          
+      responses:
+        '200':
+          description: 'Succesful Operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserItemSchema'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - users
+      description: update a particular user
+      operationId: updateUser
+
+      parameters:
+      - name: userId
+        in: path
+        description: id of the user to get
+        required: true
+        schema:
+          type: string
+      
+      requestBody:
+        content:  
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSchema'
+      responses:
+        '200':
+          description: 'Successful Operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '404':
+          description: 'Resource Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'     
+    delete:
+      tags:
+         - users
+      parameters:
+      - name: userId
+        in: path
+        description: id of the user to get
+        required: true
+        schema:
+          type: string
+      description: 'Delete a particular user'
+      operationId: deleteUser
+      responses:
+        '200':
+           description: 'Successful Operation'
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Success'
+        '404':
+           description: 'Resource Not Found'
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Error'    
+         
+        
+              
+                
+  
+   
+ 
+      
+      
+          
+    
+               
+components:
+  securitySchemes:
+   bearerAuth:
+     type: http
+     scheme: bearer
+     bearerFormat: JWT
+    
+  schemas:
+    Error:
+      type: object
+      required: 
+        - details
+      properties:
+        details:
+          type: string
+    Success:
+      type: object
+      required:
+        - details
+      properties:
+        details:
+          type: string
+         
+    CreateBlogSchema:
+      type: object
+      required:
+        - title
+        - post
+        - author
+      properties:
         title:
           type: string
-        body:
+        post:
           type: string
-        created_at:
+        author:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/UserItemSchema'
+    BlogItemSchema:
+      allOf:
+        - $ref: '#/components/schemas/CreateBlogSchema'
+        - type: object
+      required:
+        - created
+        - updated
+        - likes
+        - comments
+      properties:
+        created:
           type: string
-          format: date-time
-        updated_at:
+          format: date
+        updated:
           type: string
-          format: date-time
-        created_by:
-          type: string
-        comments:
-          type: string
+          format: date
         likes:
           type: integer
-    BlogRequest:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentSchema'
+    BlogListSchema:
+      type: array
+      items:
+        $ref: '#/components/schemas/BlogItemSchema'
+    CommentSchema:
       type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-        author_id:
-          type: string
-    Comment:
-      type: object
+      required:
+        - message
+        - author
       properties:
         message:
           type: string
         author:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-    CommentRequest:
-      type: object
-      properties:
-        comment:
           type: object
+          allOf:
+            - $ref: '#/components/schemas/UserItemSchema'
+    CreateUserSchema:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    UserItemSchema:
+      allOf:
+        - $ref: '#/components/schemas/CreateUserSchema'
+        - type: object
+          required:
+            - date_joined
+            - followers
+            - blogs_written
+            - last_online
+            - avatar_url
           properties:
-            blog:
+            date_joined:
               type: string
-            message:
-              type: string
-            author:
-              type: string
-    Error:
-      type: object
-      properties:
-
-
-        message:
-          type: string
-    SuccessMessage:
-      type: object
-      properties:
-        message:
-          type: string
+            followers:
+              type: integer
+    UserListSchema:
+      type: array
+      items:
+        $ref: "#/components/schemas/UserItemSchema"
+security:
+   - bearerAuth:
+      - getUser
+      - updateUser
+      - deleteUser
+      - updateBlog
+      - deleteBlog
+      - addBlog
