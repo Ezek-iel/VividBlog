@@ -23,5 +23,6 @@ def create_app(config_name = os.getenv("FLASK_CONFIG")):
     app.register_blueprint(api_blueprint, url_prefix = '/api/v1')
 
     from app import models
+    from app import schema
 
     return app
