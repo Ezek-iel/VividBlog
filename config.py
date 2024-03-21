@@ -11,10 +11,12 @@ class Config:
         pass
 
 class DevelopmentConfig(Config):
+    # * Configuration used in development environments only
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getenv("DEV_DATABASE_URL")
 
 class TestingConfig(Config):
+    # * Configuration used in unit and integration testing
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getenv("TESTING_DATABASE_URL")
 

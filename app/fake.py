@@ -4,6 +4,7 @@ import uuid
 import random
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from app.models import Blog, User, Comment
 from sqlalchemy.exc import IntegrityError
 from app import db

@@ -1,12 +1,13 @@
-from marshmallow import Schema, fields, post_load, post_dump
-from uuid import uuid4
-
+from marshmallow import Schema, fields, post_load
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
 
 class CreateBlogSchema(Schema):
-
+    """
+    * Schema expected when recieving data from client
+    """
+    
     title = fields.String(required=True)
     post = fields.String(required=True)
     author_id = fields.String(required=True)
@@ -27,7 +28,9 @@ class BlogItemSchema(Schema):
     author_id = fields.String(required=True)
 
 class CreateUserSchema(Schema):
-
+    """
+    * Schema expected when recieving data from client
+    """
     username = fields.String(required=True)
     emailaddress = fields.Email(required = True)
     password = fields.String(required = True)
@@ -48,7 +51,9 @@ class UserItemSchema(Schema):
     date_joined = fields.DateTime(required = True)
 
 class CreateCommentSchema(Schema):
-
+    """
+    * Schema expected when recieving data from client
+    """
     message = fields.String(required = True)
     author_id = fields.String(required = True)
     blog_id = fields.String(required = True)

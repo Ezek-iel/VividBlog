@@ -4,6 +4,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
 import unittest
 
+# ! Each test maps to a model in the database
+
 u1 = User(username = 'dog', emailaddress = 'dog@dog.com',password = 'eat')
 b1 = Blog(title = 'A cat', post = 'A cat likes to eat', author_id = u1)
 c1 = Comment(message = 'A comment', blog_id = b1, author_id = u1)
