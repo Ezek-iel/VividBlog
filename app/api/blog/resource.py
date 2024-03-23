@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from functools import cache
 from datetime import datetime
 
+
 load_dotenv()
 SERVER_URL = os.getenv('SERVER_URL')
 
@@ -64,6 +65,16 @@ class BlogItemResource(Resource):
             return {'Message' : 'Operation Successful'}, 200
         else:
             abort(404, {'Message' : 'Not found'})
+    
+    def delete(self, blogid : str):
+        blogneeded : Blog | None = Blog.query.filter_by(id = blogid).first()
+
+        if not blogneeded:
+            abort(404, {"Message": "Not found"})
+        else:
+            db.session.delete(blogneeded)
+            db.session.commit()
+            return {"Message" : "Operation successful"}
 
 class BlogListResource(Resource):
 

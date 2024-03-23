@@ -38,6 +38,28 @@ class UserItemResource(Resource):
             return user_dict
         else:
             abort(404, 'Not Found')
+    
+    def put(self, userid):
+        data = request.get_json()
+        userneeded = User.query.filter_by(id = userid).first()
+
+        if userneeded:
+            user_schema = CreateUserSchema()
+            try:
+                new_user = user_schema.load(data)
+            except ValidationError as error:
+                abort(400, error.messages)
+
+            userneeded.username = new_user.username
+            userneeded.emailaddress = new_user.emailaddress
+            userneeded.title = new_user.title
+
+            db.session.commit()
+            return {'Message' : "Operation successful"}, 200
+        else:
+            abort(404, {'Message' : "Not found"})
+            
+
 
 class UserListResource(Resource):
 
