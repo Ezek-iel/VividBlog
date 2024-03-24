@@ -1,11 +1,14 @@
+import os
+from functools import cache
+
 from flask_restful import Resource
-from ...models import User, db
-from ...schema import UserItemSchema, CreateUserSchema, BlogItemSchema
 from flask import abort, request
 from marshmallow import ValidationError
-import os
 from dotenv import load_dotenv
-from functools import cache
+from flask_jwt_extended import jwt_required
+
+from ...models import User, db
+from ...schema import UserItemSchema, CreateUserSchema, BlogItemSchema
 
 load_dotenv()
 SERVER_URL = os.getenv('SERVER_URL')
@@ -39,6 +42,7 @@ class UserItemResource(Resource):
         else:
             abort(404, 'Not Found')
     
+    @jwt_required()
     def put(self, userid):
         data = request.get_json()
         userneeded = User.query.filter_by(id = userid).first()
@@ -58,9 +62,16 @@ class UserItemResource(Resource):
             return {'Message' : "Operation successful"}, 200
         else:
             abort(404, {'Message' : "Not found"})
+    
+    @jwt_required()
+    def delete(self, userid):
+        userneeded = User.query.filter_by(id = userid).first()
+
+        if userneeded:
+            db.session.delete(userneeded)
+            db.session.commit()
+            return {'Message' : 'Operation successful'}, 200
             
-
-
 class UserListResource(Resource):
 
     def get(self):

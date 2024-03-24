@@ -1,5 +1,7 @@
-from marshmallow import Schema, fields, post_load
 import os, sys
+
+from marshmallow import Schema, fields, post_load
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
 

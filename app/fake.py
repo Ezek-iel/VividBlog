@@ -1,12 +1,12 @@
-from faker import Faker
 import os,sys
 import uuid
 import random
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from app.models import Blog, User, Comment
+from faker import Faker
 from sqlalchemy.exc import IntegrityError
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app.models import Blog, User, Comment
 from app import db
 
 def generate_random_user_id():

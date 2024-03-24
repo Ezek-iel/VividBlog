@@ -1,14 +1,18 @@
+import os
+
 from flask import Flask
-from config import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import os
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
+
+from config import config
 
 load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
+jwt = JWTManager()
 
 def create_app(config_name = os.getenv("FLASK_CONFIG")):
 
@@ -20,6 +24,7 @@ def create_app(config_name = os.getenv("FLASK_CONFIG")):
     #* initialise necessary extensions
     db.init_app(app)
     migrate.init_app(app,db)
+    jwt.init_app(app)
 
     #* insert necessary blueprints
     from .api import api_blueprint

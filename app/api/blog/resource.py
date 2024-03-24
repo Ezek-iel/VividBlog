@@ -1,12 +1,15 @@
-from flask_restful import Resource
-from flask import request, abort
-from ...models import Blog, db, Comment
-from ...schema import BlogItemSchema, CommentItemSchema, CreateCommentSchema, CreateBlogSchema
-from marshmallow import ValidationError
 import os
-from dotenv import load_dotenv
 from functools import cache
 from datetime import datetime
+
+from flask_restful import Resource
+from flask import request, abort
+from marshmallow import ValidationError
+from dotenv import load_dotenv
+from flask_jwt_extended import jwt_required
+
+from ...schema import BlogItemSchema, CommentItemSchema, CreateCommentSchema, CreateBlogSchema
+from ...models import Blog, db, Comment
 
 
 load_dotenv()
@@ -45,6 +48,7 @@ class BlogItemResource(Resource):
         else:
             abort(404, 'Not Found')
     
+    @jwt_required()
     def put(self, blogid : str):
         blogneeded : Blog | None = Blog.query.filter_by(id = blogid).first()
 
@@ -65,7 +69,9 @@ class BlogItemResource(Resource):
             return {'Message' : 'Operation Successful'}, 200
         else:
             abort(404, {'Message' : 'Not found'})
+            
     
+    @jwt_required()
     def delete(self, blogid : str):
         blogneeded : Blog | None = Blog.query.filter_by(id = blogid).first()
 
@@ -74,7 +80,7 @@ class BlogItemResource(Resource):
         else:
             db.session.delete(blogneeded)
             db.session.commit()
-            return {"Message" : "Operation successful"}
+            return {"Message" : "Operation successful"}, 200
 
 class BlogListResource(Resource):
 
@@ -117,7 +123,7 @@ class BlogListResource(Resource):
             
         else:
             all_blogs = Blog.query.offset(offset).limit(page_number).all()
-            
+             
         
     
         blogschema = BlogItemSchema()
@@ -141,6 +147,7 @@ class BlogListResource(Resource):
             'previous_page' : previous_page_url
         }
     
+    @jwt_required()
     def post(self):
 
         data = request.get_json()
@@ -157,7 +164,7 @@ class BlogListResource(Resource):
         return {'Message' : 'Operation Successful'}, 200
 
 
-class BlogCommentsResource(Resource):
+class CommentsListResource(Resource):
 
     def get(self, blogid : str):        
         blog_needed = Blog.query.filter_by(id = blogid).first()
@@ -174,6 +181,7 @@ class BlogCommentsResource(Resource):
         else:
             abort(404, "Not Found")
     
+    @jwt_required()
     def post(self, blogid : str):
 
         blog_needed = Blog.query.filter_by(id = blogid).first()
@@ -193,4 +201,26 @@ class BlogCommentsResource(Resource):
         else:
             abort(404, 'Not found')
 
+class CommentItemResource(Resource):
+
+    def get(self, blogid : str, commentid : str):
+        comment_needed = Comment.query.filter_by(id = commentid).first()
+
+        if comment_needed:
+            comment_schema = CommentItemSchema()
+            comment_dict = comment_schema.dump(comment_needed)
+            return comment_dict
+        else:
+            abort(404, 'Not Found')
+    
+    @jwt_required()
+    def delete(self, blogid : str, commentid : str):
+        comment_needed = Comment.query.filter_by(id = commentid).first()
+
+        if comment_needed:
+            db.session.delete(comment_needed)
+            db.session.commit()
+            return {'Message' : 'Operation successful'}, 200
+        else:
+            abort(404, {'Message' : 'Not found'})
 
