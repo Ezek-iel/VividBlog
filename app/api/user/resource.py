@@ -14,7 +14,7 @@ load_dotenv()
 SERVER_URL = os.getenv('SERVER_URL')
 
 @cache
-def get_users_number(query : str | None):
+def get_users_number(query : str):
     """ summary_line
     * cached function to get the number of users satisfying a query. if no query, returns all
     

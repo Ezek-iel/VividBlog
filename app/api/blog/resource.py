@@ -17,7 +17,7 @@ SERVER_URL = os.getenv('SERVER_URL')
 
 
 @cache
-def get_blogs_number(query : str | None):
+def get_blogs_number(query : str):
     """ summary_line
     * cached function to get the number of blogs satisfying a query. if no query, returns all
     
@@ -50,7 +50,7 @@ class BlogItemResource(Resource):
     
     @jwt_required()
     def put(self, blogid : str):
-        blogneeded : Blog | None = Blog.query.filter_by(id = blogid).first()
+        blogneeded : Blog = Blog.query.filter_by(id = blogid).first()
 
         if blogneeded:
             data = request.get_json()
@@ -73,7 +73,7 @@ class BlogItemResource(Resource):
     
     @jwt_required()
     def delete(self, blogid : str):
-        blogneeded : Blog | None = Blog.query.filter_by(id = blogid).first()
+        blogneeded : Blog = Blog.query.filter_by(id = blogid).first()
 
         if not blogneeded:
             abort(404, {"Message": "Not found"})
