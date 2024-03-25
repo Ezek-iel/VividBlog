@@ -86,8 +86,8 @@ class UserListResource(Resource):
 
         query = request.args.get('username')
 
-        page_set = request.args.get('page', 1)
-        page_number = int(request.args.get('page_size', 10))
+        page_set = request.args.get('currentPage', 1)
+        page_number = int(request.args.get('itemsPerPage', 10))
 
         if page_set:
             offset = page_number * (int(page_set) - 1)
