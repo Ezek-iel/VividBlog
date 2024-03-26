@@ -103,12 +103,12 @@ class UserListResource(Resource):
         if (int(page_set) + 1) > total_pages:
             next_page_url = None
         else:
-            next_page_url = '{0}/users?page={1}&page_size={2}'.format(SERVER_URL, int(page_set) + 1, page_number)
+            next_page_url = '{0}/users?currentPage={1}&itemsPerPage={2}'.format(SERVER_URL, int(page_set) + 1, page_number)
         
         if int(page_set) == 1:
             previous_page_url = None
         else:
-            previous_page_url = '{0}/users?page={1}&page_size={2}'.format(SERVER_URL, int(page_set) - 1, page_number)
+            previous_page_url = '{0}/users?currentPage={1}&itemsPerPage={2}'.format(SERVER_URL, int(page_set) - 1, page_number)
 
         if query:
             all_users = User.query.filter(User.username.like(f'%{query}%')).offset(offset).limit(page_number).all()

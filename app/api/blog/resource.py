@@ -90,13 +90,13 @@ class BlogListResource(Resource):
         * Is paginated
         * URL parameters
         - query : search by blog title -> represented 'title'
-        - page_set : current_page --> represented 'page'
-        - page_number : Number of items in a page --> 'page_number'
+        - page_set : current_page --> represented 'currentPage'
+        - page_number : Number of items in a page --> 'itemsPerPage'
         """
         
         query = request.args.get('title')
-        page_set = request.args.get('page', 1)
-        page_number = int(request.args.get('page_number', 10))
+        page_set = request.args.get('currentPage', 1)
+        page_number = int(request.args.get('itemsPerPage', 10))
 
         if page_set:
             offset = page_number * (int(page_set) -  1)
@@ -110,12 +110,12 @@ class BlogListResource(Resource):
         if (int(page_set) + 1) > total_pages:
             next_page_url = None
         else:
-            next_page_url = '{0}/blogs?page={1}'.format(SERVER_URL,(int(page_set) + 1))
+            next_page_url = '{0}/blogs?currentPage={1}'.format(SERVER_URL,(int(page_set) + 1))
 
         if int(page_set) == 1:
             previous_page_url = None
         else:
-            previous_page_url = '{0}/blogs?page={1}'.format(SERVER_URL,int(page_set) - 1)
+            previous_page_url = '{0}/blogs?currentPage={1}'.format(SERVER_URL,int(page_set) - 1)
 
         # * Filter blogs according to query
         if query:
@@ -162,65 +162,4 @@ class BlogListResource(Resource):
         db.session.commit()
 
         return {'Message' : 'Operation Successful'}, 200
-
-
-class CommentsListResource(Resource):
-
-    def get(self, blogid : str):        
-        blog_needed = Blog.query.filter_by(id = blogid).first()
-
-        if blog_needed:
-            comments = blog_needed.comments
-            commentschema = CommentItemSchema()
-            comment_list = [commentschema.dump(comment) for comment in comments]
-
-            return {
-                'No of comments' : len(comment_list),
-                'comments' : comment_list
-            }
-        else:
-            abort(404, "Not Found")
-    
-    @jwt_required()
-    def post(self, blogid : str):
-
-        blog_needed = Blog.query.filter_by(id = blogid).first()
-        data = request.get_json()
-        
-        if blog_needed:
-            commentSchema = CreateCommentSchema()  
-            try:
-                new_comment = commentSchema.load(data)            
-            except ValidationError as error:
-                abort(400, error.messages)
-
-            db.session.add(new_comment)
-            db.session.commit()   
-            return {'Message' : 'Operation Succesful'}, 200
-       
-        else:
-            abort(404, 'Not found')
-
-class CommentItemResource(Resource):
-
-    def get(self, blogid : str, commentid : str):
-        comment_needed = Comment.query.filter_by(id = commentid).first()
-
-        if comment_needed:
-            comment_schema = CommentItemSchema()
-            comment_dict = comment_schema.dump(comment_needed)
-            return comment_dict
-        else:
-            abort(404, 'Not Found')
-    
-    @jwt_required()
-    def delete(self, blogid : str, commentid : str):
-        comment_needed = Comment.query.filter_by(id = commentid).first()
-
-        if comment_needed:
-            db.session.delete(comment_needed)
-            db.session.commit()
-            return {'Message' : 'Operation successful'}, 200
-        else:
-            abort(404, {'Message' : 'Not found'})
 
