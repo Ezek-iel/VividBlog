@@ -1,33 +1,35 @@
-# VividBlog API
+# VividBlog API 🌐
 
-A Blogging API implemented using __REST__ principles and Flask-Resftul package
+VividBlog is a versatile Blogging API implemented using **REST** principles and the Flask-RESTful package. It provides a robust foundation for building dynamic and interactive blogging platforms.
+
+## Features
+
+- **RESTful Design**: Organized and intuitive endpoints following REST principles.
+- **Flask-RESTful Integration**: Utilizes the Flask-RESTful package for streamlined development.
+- **Easy Setup**: Quick and simple setup process, detailed in the [wiki](https://github.com/Ezek-iel/VividBlog/wiki/).
 
 ## Setting Up ⚙️
 
-### 1. 🤖 Clone this __repository__ 
----
-### 2. 🏠 In the home directory of the repository, create a python virtual environment.    
-> On Windows
- ```powershell
- py -m venv .venv
-```
->On Mac/Linux
-```shell
-python3 -m venv .venv
-```
----
-### 3. ⬇️ Install all required dependancies in the __[requirements file](requirements.txt)__
+For detailed instructions on setting up VividBlog, please refer to our [wiki](https://github.com/Ezek-iel/VividBlog/wiki/).
 
-```powershell
-pip install -r requirements.txt
-```
+## Contribution
+
+Feel free to contribute to the repository 🌱. We welcome contributions of all kinds, including bug fixes, feature enhancements, and documentation improvements. To contribute, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/my-feature`).
+3. Make your changes and commit them (`git commit -am 'Add new feature'`).
+4. Push your changes to your branch (`git push origin feature/my-feature`).
+5. Submit a pull request.
+
+## Support
+
+If you have any questions, suggestions, or need assistance, please open an issue or reach out to us by creating an [issue](https://github.com/Ezek-iel/VividBlog/issues).
+
+## License
+
+This project is licensed under the [GNU License](LICENSE).
+
 ---
-### 4.🏃‍♂️ Run the [application](/auto/boot.bat)
-> On Windows 🪟
-```powershell
-./auto/boot.bat
-```
-> On Linux 🐧 - Make sure you have user priviledges
-```bash
-./auto/boot.sh
-```
+
+
