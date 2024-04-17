@@ -1,7 +1,7 @@
 # VividBlog API 🌐
 
 VividBlog is a versatile Blogging API implemented using **REST** principles and the Flask-RESTful package. It provides a robust foundation for building dynamic and interactive blogging platforms.
-
+##### Please ⭐ this repo
 ## Features
 
 - **RESTful Design**: Organized and intuitive endpoints following REST principles.
