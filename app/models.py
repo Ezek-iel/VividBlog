@@ -5,11 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 
-def generate_uuid():
-    return str(uuid.uuid4())
 
 class Blog(db.Model):
-    id = db.Column(db.String(36), default = generate_uuid, primary_key = True)
+    id = db.Column(db.String(36), default = uuid.uuid4, primary_key = True)
     title = db.Column(db.String(),nullable = False)
     post = db.Column(db.Text, nullable = False)
     created = db.Column(db.DateTime(), default = datetime.now, nullable = False)
@@ -23,7 +21,7 @@ class Blog(db.Model):
 
     
 class User(db.Model):
-    id = db.Column(db.String(36), default = generate_uuid,primary_key = True)
+    id = db.Column(db.String(36), default = uuid.uuid4,primary_key = True)
     username = db.Column(db.String(40), nullable =  False)
     emailaddress = db.Column(db.String(70), nullable = False)
     title = db.Column(db.String(90), nullable = False, default = 'Beginner')
@@ -54,7 +52,7 @@ class User(db.Model):
         raise AttributeError('Change email to change avatar url')
       
 class Comment(db.Model):
-    id = db.Column(db.String(36), default = generate_uuid,primary_key = True)
+    id = db.Column(db.String(36), default = uuid.uuid4,primary_key = True)
     message = db.Column(db.Text)
     date_written = db.Column(db.DateTime(), default = datetime.now, nullable = False)
     blog_id = db.Column(db.ForeignKey('blog.id'), nullable = False)
