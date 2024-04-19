@@ -5,7 +5,7 @@ from app import schema
 from app.models import Blog, Comment, User
 import unittest
 
-# ! Each test maps to a schema in the schema.py file
+# ! Each testcase maps to a schema in the schema.py file
 class TestBlogItemSchema(unittest.TestCase):
     def setUp(self) -> None:
         self.b1 = Blog(id = 'welcome', title = 'Welcome to my blog',post = 'Welcome to my blog full content')
