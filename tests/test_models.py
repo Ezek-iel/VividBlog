@@ -1,16 +1,21 @@
 import os, sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from app.models import Blog, User, Comment
 import unittest
 
-# ! Each testcase maps to a model in the models.py file
+# * Each testcase maps to a model in the models.py file
 
-u1 = User(username = 'dog', emailaddress = 'dog@dog.com',password = 'eat')
-b1 = Blog(title = 'A cat', post = 'A cat likes to eat', author_id = u1)
+recipes = ['chicken', 'egg', 'fish', 'pepper']
+steps = ['Fry the eggs', 'wash the stews', 'Play new games']
+conclusion = "Do nothing"
+
+u1 = User(username = 'dog', email_address = 'dog@dog.com',password = 'eat')
+b1 = Blog(title = 'A cat', introduction = 'A cat likes to eat the following self.food', author_id = u1, steps_involved = steps, conclusion = conclusion, ingredients_involved = recipes)
 c1 = Comment(message = 'A comment', blog_id = b1, author_id = u1)
 
-class BlogTest(unittest.TestCase):
+class BlogTest(unittest.TestCase):     
 
     def test_blog_is_not_none(self):
         self.assertIsNotNone(b1)
@@ -20,6 +25,20 @@ class BlogTest(unittest.TestCase):
     
     def test_blog_author_is_user(self):
         self.assertIsInstance(b1.author_id, User)
+
+    def test_ingredients_are_joined(self):
+        result_value = 'chicken,egg,fish,pepper'
+        self.assertEqual(b1.ingredients, result_value)
+
+    def test_steps_are_joined(self):
+        result_value = 'Fry the eggs,wash the stews,Play new games'
+        self.assertEqual(b1.steps, result_value)
+    
+    def test_ingredients_involved_are_splitted(self):
+        self.assertEqual(b1.ingredients_involved,b1.ingredients.split(","))
+    
+    def test_steps_involved_are_splitted(self):
+        self.assertEqual(b1.steps_involved, b1.steps.split(","))
 
 class UserTest(unittest.TestCase):
 
@@ -31,7 +50,7 @@ class UserTest(unittest.TestCase):
             u1.password
     
     def test_users_password_hash_are_unequal(self):
-        u2= User(username = 'cat', emailaddress = 'dog@cat.com',password = 'eat')
+        u2= User(username = 'cat', email_address = 'dog@cat.com',password = 'eat')
         self.assertNotEqual(u1.password_hash, u2.password_hash)
     
     def test_user_avatar_url(self):

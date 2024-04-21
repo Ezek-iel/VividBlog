@@ -9,7 +9,10 @@ from app import db
 class Blog(db.Model):
     id = db.Column(db.String(36), default = uuid.uuid4, primary_key = True)
     title = db.Column(db.String(),nullable = False)
-    post = db.Column(db.Text, nullable = False)
+    introduction = db.Column(db.Text, nullable = False)
+    ingredients = db.Column(db.Text, nullable = False)
+    steps = db.Column(db.Text, nullable = False)
+    conclusion = db.Column(db.Text, nullable = False)
     created = db.Column(db.DateTime(), default = datetime.now, nullable = False)
     updated = db.Column(db.DateTime(), nullable = True)
     likes = db.Column(db.Integer(), default = 0)
@@ -19,11 +22,26 @@ class Blog(db.Model):
 
     comments = db.relationship('Comment',backref = 'comment_author')
 
+    @property
+    def ingredients_involved(self):
+        return self.ingredients.split(",")
+    
+    @ingredients_involved.setter
+    def ingredients_involved(self, values):
+        self.ingredients = ",".join(values)
+    
+    @property
+    def steps_involved(self):
+        return self.steps.split(",")
+    
+    @steps_involved.setter
+    def steps_involved(self, values):
+        self.steps =  ",".join(values)
     
 class User(db.Model):
     id = db.Column(db.String(36), default = uuid.uuid4,primary_key = True)
     username = db.Column(db.String(40), nullable =  False)
-    emailaddress = db.Column(db.String(70), nullable = False)
+    email_address = db.Column(db.String(70), nullable = False)
     title = db.Column(db.String(90), nullable = False, default = 'Beginner')
     password_hash = db.Column(db.String(60), nullable = False)
     followers = db.Column(db.Integer(), default = 0)
@@ -45,7 +63,7 @@ class User(db.Model):
     
     @property
     def avatar_url(self):
-        return 'https://www.gravatar.com/{0}'.format(self.emailaddress)
+        return 'https://www.gravatar.com/{0}'.format(self.email_address)
     
     @avatar_url.setter
     def avatar_url(self, value):

@@ -5,12 +5,18 @@ from app import schema
 from app.models import Blog, Comment, User
 import unittest
 
-# ! Each testcase maps to a schema in the schema.py file
+
+recipes = ['chicken', 'egg', 'fish', 'pepper']
+steps = ['Fry the eggs', 'wash the stews', 'Play new games']
+conclusion = "Do nothing"
+
+# * Each testcase maps to a schema in the schema.py file
 class TestBlogItemSchema(unittest.TestCase):
     def setUp(self) -> None:
-        self.b1 = Blog(id = 'welcome', title = 'Welcome to my blog',post = 'Welcome to my blog full content')
+        self.b1 = Blog(id = 'welcome', title = 'Welcome to my blog', introduction = "A random cooking blog", ingredients_involved = recipes, steps_involved = steps, conclusion = conclusion)
         self.bschema = schema.BlogItemSchema()
         self.bdump = self.bschema.dump(self.b1)
+
 
     def test_blog_dump_data_is_not_none(self):
         self.assertIsNotNone(self.bdump)
@@ -22,7 +28,10 @@ class TestBlogItemSchema(unittest.TestCase):
         correct = {
             'id' : 'welcome',
             'title' : 'Welcome to my blog',
-            'post' : 'Welcome to my blog full content',
+            'introduction' : 'A random cooking blog',
+            'ingredients_involved' : recipes,
+            'steps_involved' : steps,
+            'conclusion' : conclusion,
             'created' : None,
             'updated' : None,
             'likes' : None,
@@ -30,13 +39,17 @@ class TestBlogItemSchema(unittest.TestCase):
             'author_id': None
         }
         self.assertEqual(self.bdump, correct)
+        
 
 class TestCreateBlogItemSchema(unittest.TestCase):
     
     def setUp(self) -> None:
         self.sample_blog_data = {
             'title' : 'A very good blog',
-            'post' : 'A very good blog content',
+            'introduction' : "Introduction for a very good blog",
+            'ingredients_involved' : recipes,
+            'steps_involved' : steps,
+            'conclusion' : conclusion,
             'author_id' : '1'
         }
         self.schema = schema.CreateBlogSchema()
@@ -52,7 +65,7 @@ class TestCreateUserSchema(unittest.TestCase):
     def setUp(self) -> None:
         self.sample_user_data = {
             'username' : 'John jones',
-            'emailaddress' : 'johnjones@gmail.com',
+            'email_address' : 'johnjones@gmail.com',
             'password' : 'dapassword',
             'title' : 'Mr'
         }
@@ -67,7 +80,7 @@ class TestCreateUserSchema(unittest.TestCase):
 
 class TestUserItemSchema(unittest.TestCase):
     def setUp(self) -> None:
-        self.u1 = User(username = 'John jones', emailaddress = 'john@jones.com',title = 'Mr.')
+        self.u1 = User(username = 'John jones', email_address = 'john@jones.com',title = 'Mr.')
         self.uschema = schema.UserItemSchema()
         self.udump = self.uschema.dump(self.u1)
 
@@ -81,7 +94,7 @@ class TestUserItemSchema(unittest.TestCase):
         correct = {
             'id' : None,
             'username' : 'John jones',
-            'emailaddress' : 'john@jones.com',
+            'email_address' : 'john@jones.com',
             'title' : "Mr.",
             'followers' : None,
             'avatar_url' : 'https://www.gravatar.com/john@jones.com',

@@ -11,7 +11,10 @@ class CreateBlogSchema(Schema):
     """
     
     title = fields.String(required=True)
-    post = fields.String(required=True)
+    introduction = fields.String(required=True)
+    ingredients_involved = fields.List(fields.String(required=True))
+    steps_involved = fields.List(fields.String(required=True))
+    conclusion = fields.String(required=True)
     author_id = fields.String(required=True)
 
     @post_load
@@ -22,7 +25,10 @@ class BlogItemSchema(Schema):
 
     id = fields.String(required=True)
     title = fields.String(required=True)
-    post = fields.String(required=True)
+    introduction = fields.String(required=True)
+    ingredients_involved = fields.List(fields.String(required=True))
+    steps_involved = fields.List(fields.String(required=True))
+    conclusion = fields.String(required=True)
     created = fields.DateTime(required=True)
     updated = fields.DateTime()
     likes = fields.Integer()
@@ -34,7 +40,7 @@ class CreateUserSchema(Schema):
     * Schema expected when recieving data from client
     """
     username = fields.String(required=True)
-    emailaddress = fields.Email(required = True)
+    email_address = fields.Email(required = True)
     password = fields.String(required = True)
     title = fields.String(required = True)
 
@@ -46,7 +52,7 @@ class UserItemSchema(Schema):
     
     id = fields.String(required=True)
     username = fields.String(required=True)
-    emailaddress = fields.String(required=True)
+    email_address = fields.String(required=True)
     title = fields.String(required=True)
     followers = fields.Integer()
     avatar_url = fields.String(required=True)
