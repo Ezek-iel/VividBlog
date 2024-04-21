@@ -1,5 +1,5 @@
 import os
-from functools import cache
+from functools import lru_cache
 from datetime import datetime
 
 from flask_restful import Resource
@@ -16,15 +16,12 @@ load_dotenv()
 SERVER_URL = os.getenv('SERVER_URL')
 
 
-@cache
+@lru_cache
 def get_blogs_number(query : str):
     """ summary_line
     * cached function to get the number of blogs satisfying a query. if no query, returns all
-    
     Keyword arguments:
-    
     query -- search query
-    
     Return: Number of blogs satisfying the query or all if no query exists
     """
     

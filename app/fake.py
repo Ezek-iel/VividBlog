@@ -9,6 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
 from app import db
 
+# TODO Update fake data to existing database schema and save in database
+
 def generate_random_user_id():
     return random.choice([user.id for user in User.query.all()])
 
