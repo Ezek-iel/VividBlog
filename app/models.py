@@ -5,12 +5,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 
+def generate_random_id():
+    return str(uuid.uuid4())
 
 class Blog(db.Model):
-    id = db.Column(db.String(36), default = uuid.uuid4, primary_key = True)
+    id = db.Column(db.String(36), default = generate_random_id, primary_key = True)
     title = db.Column(db.String(),nullable = False)
     introduction = db.Column(db.Text, nullable = False)
-    ingredients = db.Column(db.Text, nullable = False)
+    ingredients = db.Column(db.Text, nullable = True)
     steps = db.Column(db.Text, nullable = False)
     conclusion = db.Column(db.Text, nullable = False)
     created = db.Column(db.DateTime(), default = datetime.now, nullable = False)
