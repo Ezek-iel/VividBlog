@@ -41,7 +41,7 @@ class Blog(db.Model):
         self.steps =  ",".join(values)
     
 class User(db.Model):
-    id = db.Column(db.String(36), default = uuid.uuid4,primary_key = True)
+    id = db.Column(db.String(36), default = generate_random_id ,primary_key = True)
     username = db.Column(db.String(40), nullable =  False)
     email_address = db.Column(db.String(70), nullable = False)
     title = db.Column(db.String(90), nullable = False, default = 'Beginner')
@@ -65,7 +65,7 @@ class User(db.Model):
     
     @property
     def avatar_url(self):
-        return 'https://www.gravatar.com/{0}'.format(self.email_address)
+        return 'https://www.robohash.org/{0}'.format(self.email_address)
     
     @avatar_url.setter
     def avatar_url(self, value):

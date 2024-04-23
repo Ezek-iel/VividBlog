@@ -54,7 +54,7 @@ class UserTest(unittest.TestCase):
         self.assertNotEqual(u1.password_hash, u2.password_hash)
     
     def test_user_avatar_url(self):
-        self.assertEqual(u1.avatar_url, 'https://www.gravatar.com/dog@dog.com')
+        self.assertEqual(u1.avatar_url, 'https://www.robohash.org/dog@dog.com')
     
     def test_user_verify_password(self):
         self.assertTrue(u1.verify_password('eat'))

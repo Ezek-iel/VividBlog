@@ -97,7 +97,7 @@ class TestUserItemSchema(unittest.TestCase):
             'email_address' : 'john@jones.com',
             'title' : "Mr.",
             'followers' : None,
-            'avatar_url' : 'https://www.gravatar.com/john@jones.com',
+            'avatar_url' : 'https://www.robohash.org/john@jones.com',
             'date_joined' : None
         }
         self.assertEqual(self.udump, correct)

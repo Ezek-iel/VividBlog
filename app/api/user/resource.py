@@ -55,7 +55,7 @@ class UserItemResource(Resource):
                 abort(400, error.messages)
 
             userneeded.username = new_user.username
-            userneeded.emailaddress = new_user.emailaddress
+            userneeded.email_address = new_user.email_address
             userneeded.title = new_user.title
 
             db.session.commit()
