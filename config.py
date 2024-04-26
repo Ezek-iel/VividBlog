@@ -22,7 +22,8 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     # * Configuration used in unit and integration testing
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL")
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.getenv("TESTING_DATABASE_URL")
 
 config = {
     "development" : DevelopmentConfig,

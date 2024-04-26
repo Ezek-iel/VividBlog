@@ -2,7 +2,7 @@ import os, sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app.models import Blog, User, Comment
+from app.models import Blog, User, Comment, generate_random_id
 import unittest
 
 # * Each testcase maps to a model in the models.py file
@@ -15,7 +15,13 @@ u1 = User(username = 'dog', email_address = 'dog@dog.com',password = 'eat')
 b1 = Blog(title = 'A cat', introduction = 'A cat likes to eat the following self.food', author_id = u1, steps_involved = steps, conclusion = conclusion, ingredients_involved = recipes)
 c1 = Comment(message = 'A comment', blog_id = b1, author_id = u1)
 
-class BlogTest(unittest.TestCase):     
+class RandomIdTest(unittest.TestCase):
+
+    def test_random_uuid(self):
+        self.assertEqual(len(generate_random_id()), 36)
+
+
+class BlogTest(unittest.TestCase):   
 
     def test_blog_is_not_none(self):
         self.assertIsNotNone(b1)
