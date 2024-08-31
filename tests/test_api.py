@@ -4,6 +4,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import create_app, db
+from app import fake
 from flask import current_app
 
 class TestConfig(unittest.TestCase):
@@ -14,6 +15,9 @@ class TestConfig(unittest.TestCase):
         self.app_context.push()
         self.test_client = self.app.test_client()
         db.create_all()
+        fake.generate_fake_users(20)
+        fake.generate_fake_blogs(10)
+        fake.generate_fake_comments(5)
     
     def test_app_is_not_none(self):
         self.assertIsNotNone(self.app)
@@ -99,7 +103,7 @@ class UserEndpointTesting(unittest.TestCase):
             "title" : "Technical Writer"
         }
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
     def tearDown(self) -> None:
         db.drop_all()
         self.app_context.pop()

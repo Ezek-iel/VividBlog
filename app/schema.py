@@ -1,9 +1,11 @@
 import os, sys
 
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, post_dump
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
+
+SERVER_URL = os.getenv("SERVER_URL")
 
 class CreateBlogSchema(Schema):
     """
@@ -26,14 +28,19 @@ class BlogItemSchema(Schema):
     id = fields.String(required=True)
     title = fields.String(required=True)
     introduction = fields.String(required=True)
-    ingredients_involved = fields.List(fields.String(required=True))
-    steps_involved = fields.List(fields.String(required=True))
+    ingredients = fields.List(fields.String(required=True))
+    steps = fields.List(fields.String(required=True))
     conclusion = fields.String(required=True)
     created = fields.DateTime(required=True)
     updated = fields.DateTime()
     likes = fields.Integer()
     comments_number = fields.Integer()
     author_id = fields.String(required=True)
+
+    @post_dump
+    def make_blog(self, mapping, **kwargs):
+        mapping["comments_url"] = "{0}/blogs/{1}/comments".format(SERVER_URL, mapping['id']) 
+        return mapping
 
 class CreateUserSchema(Schema):
     """
@@ -57,6 +64,11 @@ class UserItemSchema(Schema):
     followers = fields.Integer()
     avatar_url = fields.String(required=True)
     date_joined = fields.DateTime(required = True)
+
+    @post_dump
+    def make_user(self, mapping, **kwargs):
+        mapping['blogs_url'] = "{0}/users/{1}/blogs".format(SERVER_URL, mapping['id'])
+        return mapping
 
 class CreateCommentSchema(Schema):
     """
