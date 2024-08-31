@@ -34,4 +34,6 @@ def create_app(config_name = os.getenv("FLASK_CONFIG")):
     from app import models
     from app import schema
 
+    app.logger.warn(app.url_map)
+
     return app

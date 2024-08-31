@@ -11,165 +11,128 @@ from ...models import User, db
 from ...schema import UserItemSchema, CreateUserSchema, BlogItemSchema
 
 load_dotenv()
-SERVER_URL = os.getenv('SERVER_URL')
+SERVER_URL = os.getenv("SERVER_URL")
 
-@cache
-def get_users_number(query : str):
-    """ summary_line
-    * cached function to get the number of users satisfying a query. if no query, returns all
-    
-    Keyword arguments:
-    
-    query -- search query
-    
-    Return: Number of users satisfying the query or all if no query exists
-    """
-    if query:
-        all_users = User.query.filter(User.username.like(f'%{query}%')).all()
-        return len(all_users)
-    else:
-        all_users = User.query.all()
-        return len(all_users)
 
 class UserItemResource(Resource):
 
     def get(self, userid):
-        user_needed = User.query.filter_by(id = userid).first()
-        if user_needed:
-            uschema = UserItemSchema()
-            user_dict = uschema.dump(user_needed)
-            return user_dict
-        else:
-            abort(404, 'Not Found')
+        user_needed = User.query.get_or_404()
+        return {"user" : UserItemSchema().dump(user_needed)}
     
     @jwt_required()
     def put(self, userid):
         data = request.get_json()
-        userneeded = User.query.filter_by(id = userid).first()
+        user_needed = User.query.get_or_404(userid)
 
-        if userneeded:
-            user_schema = CreateUserSchema()
-            try:
-                new_user = user_schema.load(data)
-            except ValidationError as error:
-                abort(400, error.messages)
 
-            userneeded.username = new_user.username
-            userneeded.email_address = new_user.email_address
-            userneeded.title = new_user.title
-
-            db.session.commit()
-            return {'Message' : "Operation successful"}, 200
-        else:
-            abort(404, {'Message' : "Not found"})
-    
-    @jwt_required()
-    def delete(self, userid):
-        userneeded = User.query.filter_by(id = userid).first()
-
-        if userneeded:
-            db.session.delete(userneeded)
-            db.session.commit()
-            return {'Message' : 'Operation successful'}, 200
-            
-class UserListResource(Resource):
-
-    def get(self):
-        
-        """
-        * Is paginated
-        * URL parameters
-        - query : search by blog title -> represented 'title'
-        - page_set : current_page --> represented 'page'
-        - page_number : Number of items in a page --> 'page_number'
-        """
-
-        query = request.args.get('username')
-
-        page_set = request.args.get('currentPage', 1)
-        page_number = int(request.args.get('itemsPerPage', 10))
-
-        if page_set:
-            offset = page_number * (int(page_set) - 1)
-        else:
-            offset = 0
-        
-        count = get_users_number(query)
-        total_pages = count // page_number
-        
-        userschema = UserItemSchema()
-
-        # * next page and previous page url to enforce HATEOAS principles
-        if (int(page_set) + 1) > total_pages:
-            next_page_url = None
-        else:
-            next_page_url = '{0}/users?currentPage={1}&itemsPerPage={2}'.format(SERVER_URL, int(page_set) + 1, page_number)
-        
-        if int(page_set) == 1:
-            previous_page_url = None
-        else:
-            previous_page_url = '{0}/users?currentPage={1}&itemsPerPage={2}'.format(SERVER_URL, int(page_set) - 1, page_number)
-
-        if query:
-            all_users = User.query.filter(User.username.like(f'%{query}%')).offset(offset).limit(page_number).all()
-        else:
-            all_users = User.query.offset(offset).limit(page_number).all()
-
-        all_users_list = []
-        
-        for user in all_users:
-            user_dict = userschema.dump(user)
-
-            # * insert urls to enable easy navigation for clients
-
-            user_dict['user_url'] = '{0}/users/{1}'.format(SERVER_URL,user_dict['id'])
-            all_users_list.append(user_dict)
-        
-        return {
-            'users' : all_users_list,
-            'total_pages' : total_pages,
-            'page' : page_set,
-            'page_number' : page_number,
-            'next_page' : next_page_url,
-            'previous_page': previous_page_url
-        }
-    
-    def post(self):
-
-        data = request.get_json()
         user_schema = CreateUserSchema()
-        
         try:
             new_user = user_schema.load(data)
         except ValidationError as error:
             abort(400, error.messages)
-        
+
+        user_needed.username = new_user.username
+        user_needed.email_address = new_user.email_address
+        user_needed.title = new_user.title
+
+        db.session.commit()
+        return {"Message": "Operation successful"}, 200
+    
+    @jwt_required()
+    def delete(self, userid):
+        user_needed = User.query.get_or_404(userid)
+
+        db.session.delete(user_needed)
+        db.session.commit()
+        return {"Message": "Operation successful"}, 200
+
+
+class UserListResource(Resource):
+
+    def get(self):
+        """
+        * Is paginated
+        * URL parameters
+        - query : search by username -> represented 'username'
+        - query : search by email_address -> represented 'emailAddress'
+        - current_page : current_page --> represented 'currentPage'
+        - items_per_page : Number of items in a page --> 'itemsPerPage'
+        """
+
+        username = request.args.get("username")
+        email_address = request.args.get("emailAddress")
+        current_page = request.args.get("currentPage", type=int, default=1)
+        items_per_page = request.args.get("itemsPerPage", type=int, default=10)
+
+        query = User.query
+        next_url = None
+        previous_url = None
+
+        if username:
+            query = query.filter(User.username.like(f"%{username}%"))
+            pagination = query.paginate(
+                page=current_page, per_page=items_per_page, error_out=True
+            )
+
+            if pagination.page > 1:
+                previous_url = f"{SERVER_URL}/users/title={username}&currentPage={pagination.page - 1}&itemsPerPage={pagination.per_page}"
+
+            if pagination.page < pagination.pages:
+                next_url = f"{SERVER_URL}/users/title={username}&currentPage={pagination.page + 1}&itemsPerPage={pagination.per_page}"
+
+        if email_address:
+            query = query.filter(User.email_address.like(f"%{email_address}%"))
+            pagination = query.paginate(
+                page=current_page, per_page=items_per_page, error_out=True
+            )
+
+            if pagination.page > 1:
+                previous_url = f"{SERVER_URL}/users/emailAddress={email_address}&currentPage={pagination.page - 1}&itemsPerPage={pagination.per_page}"
+
+            if pagination.page < pagination.pages:
+                next_url = f"{SERVER_URL}/blogs/emailAddress={email_address}&currentPage={pagination.page + 1}&itemsPerPage={pagination.per_page}"
+
+        else:
+            pagination = query.paginate(
+                page=current_page, per_page=items_per_page, error_out=True
+            )
+
+            if pagination.page > 1:
+                previous_url = f"{SERVER_URL}/users?currentPage={pagination.page - 1}&itemsPerPage={pagination.per_page}"
+
+            if pagination.page < pagination.pages:
+                next_url = f"{SERVER_URL}/users/?&currentPage={pagination.page + 1}&itemsPerPage={pagination.per_page}"
+
+        return {
+            "users": [UserItemSchema().dump(user) for user in pagination.items],
+            "next_url": next_url,
+            "previous_url": previous_url,
+            "no of pages": pagination.pages,
+        }
+
+    def post(self):
+
+        data = request.get_json()
+        user_schema = CreateUserSchema()
+
+        try:
+            new_user = user_schema.load(data)
+        except ValidationError as error:
+            abort(400, error.messages)
+
         db.session.add(new_user)
         db.session.commit()
-        return {'Message' : 'Operation Succesful'}, 200
+        return {"Message": "Operation Succesful"}, 201
 
 
 class UserItemBlogs(Resource):
 
     def get(self, userid):
 
-        userneeded = User.query.filter_by(id = userid).first()
-        
-        if not userneeded:
-            abort(404, "Not found")
-        else:
-            blogschema = BlogItemSchema()
-            userblogs = userneeded.blogs
-            all_blogs_list = []
-            
-            for blog in userblogs:
-                blog_dict = blogschema.dump(blog)
+        user_needed = User.query.get_or_404(userid)
+        user_blogs = user_needed.blogs
 
-                # * insert urls to enable easy navigation for clients
+        print(user_blogs)
 
-                blog_dict['blog_url'] = '{0}/blogs/{1}'.format(SERVER_URL, blog_dict['id'])
-                blog_dict['author_url'] = '{0}/users/{1}'.format(SERVER_URL, blog_dict['author_id'])
-                all_blogs_list.append(blog_dict)
-            return {
-                'blogs' : all_blogs_list
-            }
+        return {'blogs' : [BlogItemSchema().dump(blog) for blog in user_blogs]}

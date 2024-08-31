@@ -39,7 +39,7 @@ class CommentsListResource(Resource):
 
             db.session.add(new_comment)
             db.session.commit()   
-            return {'Message' : 'Operation Succesful'}, 200
+            return {'Message' : 'Operation Succesful'}, 201
        
         else:
             abort(404, 'Not found')
