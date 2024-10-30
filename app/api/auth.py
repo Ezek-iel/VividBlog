@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token, get_jwt, jwt_required
+from flask_jwt_extended import create_access_token
 from flask_restful import Resource
 from flask import request
 from app import jwt, db

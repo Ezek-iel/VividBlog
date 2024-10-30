@@ -12,14 +12,15 @@ from ...schema import UserItemSchema, CreateUserSchema, BlogItemSchema
 load_dotenv()
 SERVER_URL = os.getenv("SERVER_URL")
 
+SERVER_URL = os.getenv("SERVER_URL")
+
 
 class UserItemResource(Resource):
 
     def get(self, userid):
-
-        user_needed = User.query.get_or_404(userid)
-        return UserItemSchema().dump(user_needed)
-
+        user_needed = User.query.get_or_404()
+        return {"user" : UserItemSchema().dump(user_needed)}
+    
     @jwt_required()
     def put(self, userid):
 
@@ -35,12 +36,11 @@ class UserItemResource(Resource):
 
     @jwt_required()
     def delete(self, userid):
-        userneeded = User.query.filter_by(id=userid).first()
+        user_needed = User.query.get_or_404(userid)
 
-        if userneeded:
-            db.session.delete(userneeded)
-            db.session.commit()
-            return {"Message": "Operation successful"}, 200
+        db.session.delete(user_needed)
+        db.session.commit()
+        return {"Message": "Operation successful"}, 200
 
 
 class UserListResource(Resource):
@@ -49,9 +49,10 @@ class UserListResource(Resource):
         """
         * Is paginated
         * URL parameters
-        - query : search by blog title -> represented 'title'
-        - page_set : current_page --> represented 'page'
-        - page_number : Number of items in a page --> 'page_number'
+        - query : search by username -> represented 'username'
+        - query : search by email_address -> represented 'emailAddress'
+        - current_page : current_page --> represented 'currentPage'
+        - items_per_page : Number of items in a page --> 'itemsPerPage'
         """
 
         # * Collect all query parameters
@@ -82,6 +83,7 @@ class UserListResource(Resource):
             "page" : pagination.page,
             "total_pages" : pagination.pages
         }
+
 
     def post(self):
 

@@ -1,3 +1,7 @@
+ <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/flask/flask-original.svg" height = "64px" /> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/sqlite/sqlite-original.svg" height = "64px"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" height = "64px"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/json/json-original.svg" height = "64px" />
+          
+          
+          
 # VividBlog API 🌐
 
 VividBlog is a versatile Blogging API implemented using **REST** principles and the Flask-RESTful package. It provides a robust foundation for building dynamic and interactive blogging platforms.

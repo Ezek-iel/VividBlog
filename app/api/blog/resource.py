@@ -1,5 +1,4 @@
 import os
-from functools import lru_cache
 from datetime import datetime
 
 from flask_restful import Resource
@@ -9,30 +8,14 @@ from dotenv import load_dotenv
 from flask_jwt_extended import jwt_required
 
 from ...schema import BlogItemSchema, CreateBlogSchema
-from ...models import Blog, db, User
+from ...models import Blog, db, Comment
 
 
 # FIXME use marshmello.post_dump instead to make the code more cleaner srsly
 
 load_dotenv()
-SERVER_URL = os.getenv('SERVER_URL')
+SERVER_URL = os.getenv("SERVER_URL")
 
-
-@lru_cache
-def get_blogs_number(query : str):
-    """ summary_line
-    * cached function to get the number of blogs satisfying a query. if no query, returns all
-    Keyword arguments:
-    query -- search query
-    Return: Number of blogs satisfying the query or all if no query exists
-    """
-    
-    if query:
-        all_blogs = Blog.query.filter(Blog.title.like(f'%{query}%')).all()
-        return len(all_blogs)
-    else:
-        all_blogs= Blog.query.all()
-        return len(all_blogs)
 
 class BlogItemResource(Resource):
 
@@ -47,104 +30,81 @@ class BlogItemResource(Resource):
             abort(404, 'Not Found')
     
     @jwt_required()
-    def put(self, blogid : str):
-        blogneeded : Blog = Blog.query.filter_by(id = blogid).first()
+    def put(self, blogid: str):
+        blog_needed = Blog.query.get_or_404(blogid)
+        data = request.get_json()
+        blog_schema = CreateBlogSchema()
 
-        if blogneeded:
-            data = request.get_json()
-            blog_schema = CreateBlogSchema()
+        try:
+            new_blog = blog_schema.load(data)
+        except ValidationError as error:
+            abort(400, error.messages)
 
-            try:
-                new_blog = blog_schema.load(data)
-            except ValidationError as error:
-                abort(400, error.messages)
-            
-            blogneeded.title = new_blog.title
-            blogneeded.post = new_blog.post
-            blogneeded.updated = datetime.now()
+        blog_needed.title = new_blog.title
+        blog_needed.post = new_blog.post
+        blog_needed.updated = datetime.now()
 
-            db.session.commit()
-            return {'Message' : 'Operation Successful'}, 200
-        else:
-            abort(404, {'Message' : 'Not found'})
-            
-    
+        db.session.commit()
+        return {"Message": "Operation Successful"}, 200
+        
+
     @jwt_required()
-    def delete(self, blogid : str):
-        blogneeded : Blog = Blog.query.filter_by(id = blogid).first()
+    def delete(self, blogid: str):
+        blog_needed: Blog = Blog.query.get_or_404(blogid)
+        db.session.delete(blog_needed)
+        db.session.commit()
+        return {"Message": "Operation successful"}, 200
 
-        if not blogneeded:
-            abort(404, {"Message": "Not found"})
-        else:
-            db.session.delete(blogneeded)
-            db.session.commit()
-            return {"Message" : "Operation successful"}, 200
 
 class BlogListResource(Resource):
 
     def get(self):
-        
         """
+        ? 127.0.0.1:5000/blogs?title=cookie&currentPage=2&itemsPerPage=10
         * Is paginated
         * URL parameters
-        - query : search by blog title -> represented 'title'
+        - title : search by blog title -> represented 'title'
         - page_set : current_page --> represented 'currentPage'
         - page_number : Number of items in a page --> 'itemsPerPage'
         """
-        
-        query = request.args.get('title')
-        page_set = request.args.get('currentPage', 1)
-        page_number = int(request.args.get('itemsPerPage', 10))
 
-        if page_set:
-            offset = page_number * (int(page_set) -  1)
+        title = request.args.get("title")
+        current_page = request.args.get("currentPage", type=int, default=1)
+        items_per_page = request.args.get("itemsPerPage", type=int, default=10)
+
+        query = Blog.query
+        next_url = None
+        previous_url = None
+        if title:
+            query = query.filter(Blog.title.like(f"%{title}%"))
+            pagination = query.paginate(
+                page=current_page, per_page=items_per_page, error_out=True
+            )
+
+            if pagination.page > 1:
+                previous_url = f"{SERVER_URL}/blogs/title={title}&currentPage={pagination.page - 1}&itemsPerPage={pagination.per_page}"
+
+            if pagination.page < pagination.pages:
+                next_url = f"{SERVER_URL}/blogs/title={title}&currentPage={pagination.page + 1}&itemsPerPage={pagination.per_page}"
+
         else:
-            offset = 0
-        
-        count = get_blogs_number(query)
-        total_pages = count // page_number
+            pagination = query.paginate(
+                page=current_page, per_page=items_per_page, error_out=True
+            )
 
-        # * next_page and previous_page url to enforce HATEOAS principles 
-        if (int(page_set) + 1) > total_pages:
-            next_page_url = None
-        else:
-            next_page_url = '{0}/blogs?currentPage={1}'.format(SERVER_URL,(int(page_set) + 1))
+            if pagination.page > 1:
+                previous_url = f"{SERVER_URL}/blogs?currentPage={pagination.page - 1}&itemsPerPage={pagination.per_page}"
 
-        if int(page_set) == 1:
-            previous_page_url = None
-        else:
-            previous_page_url = '{0}/blogs?currentPage={1}'.format(SERVER_URL,int(page_set) - 1)
-
-        # * Filter blogs according to query
-        if query:
-            all_blogs = Blog.query.filter(Blog.title.like(f'%{query}%')).offset(offset).limit(page_number).all()
-            
-        else:
-            all_blogs = Blog.query.offset(offset).limit(page_number).all()
-             
-        
-    
-        blogschema = BlogItemSchema()
-        all_blogs_list = []
-
-        for blog in all_blogs:
-            blog_dict = blogschema.dump(blog)
-        
-            # * insert urls to enable easy navigation for clients
-
-            blog_dict['blog_url'] = '{0}/blogs/{1}'.format(SERVER_URL, blog_dict['id'])
-            blog_dict['author_url'] = '{0}/users/{1}'.format(SERVER_URL, blog_dict['author_id'])
-            all_blogs_list.append(blog_dict)
+            if pagination.page < pagination.pages:
+                next_url = f"{SERVER_URL}/blogs/?&currentPage={pagination.page + 1}&itemsPerPage={pagination.per_page}"
         
         return {
-            'blogs' : all_blogs_list,
-            'total_pages' : total_pages,
-            'page' : page_set,
-            'page_number' : page_number,
-            'next_page' : next_page_url,
-            'previous_page' : previous_page_url
+            "blogs" : [BlogItemSchema().dump(blog) for blog in pagination.items],
+            "next_url" : next_url,
+            "previous_url" : previous_url,
+            "no of pages" : pagination.pages
         }
-    
+
     @jwt_required()
     def post(self):
 
@@ -159,5 +119,4 @@ class BlogListResource(Resource):
         db.session.add(new_blog)
         db.session.commit()
 
-        return {'Message' : 'Operation Successful'}, 200
-
+        return {"Message": "Operation Successful"}, 201
