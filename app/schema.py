@@ -1,9 +1,10 @@
-import os, sys
+import os
 
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, post_dump
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
+
+SERVER_URL = os.getenv('SERVER_URL')
 
 class CreateBlogSchema(Schema):
     """
@@ -34,6 +35,15 @@ class BlogItemSchema(Schema):
     likes = fields.Integer()
     comments_number = fields.Integer()
     author_id = fields.String(required=True)
+    author_name = fields.String(required=True)
+
+    @post_dump
+    def make_url(self, mapping, **kwargs):
+        author=  User.query.get(mapping['author_id'])
+
+        mapping['comments_url'] = '{0}/blogs/{1}/comments'.format(SERVER_URL, mapping['id'])
+        mapping['author_name'] = author.username
+        return mapping
 
 class CreateUserSchema(Schema):
     """
@@ -52,9 +62,9 @@ class UserItemSchema(Schema):
     
     id = fields.String(required=True)
     username = fields.String(required=True)
-    email_address = fields.String(required=True)
+    email_address = fields.Email(required=True)
     title = fields.String(required=True)
-    followers = fields.Integer()
+    followers_list = fields.List(fields.String())
     avatar_url = fields.String(required=True)
     date_joined = fields.DateTime(required = True)
 
@@ -77,5 +87,11 @@ class CommentItemSchema(Schema):
     author_id = fields.String(required = True)
     blog_id = fields.String(required = True)
     date_written = fields.String(required=True)
+
+    @post_dump
+    def make_url(self, mapping, **kwargs):
+        author = User.query.get(mapping['author_id'])
+        mapping['author_name'] = author.username
+        return mapping
     
 

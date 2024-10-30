@@ -1,10 +1,11 @@
-import os
+import os, logging
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from config import config
 
@@ -13,6 +14,7 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+cors = CORS(resources={r"/*": {"origins": "http://localhost:5173"}})
 
 def create_app(config_name = os.getenv("FLASK_CONFIG")):
 
@@ -25,6 +27,8 @@ def create_app(config_name = os.getenv("FLASK_CONFIG")):
     db.init_app(app)
     migrate.init_app(app,db)
     jwt.init_app(app)
+    cors.init_app(app)
+
 
     #* insert necessary blueprints
     from .api import api_blueprint
@@ -34,4 +38,5 @@ def create_app(config_name = os.getenv("FLASK_CONFIG")):
     from app import models
     from app import schema
 
+    app.logger.log(logging.INFO, app.url_map)
     return app

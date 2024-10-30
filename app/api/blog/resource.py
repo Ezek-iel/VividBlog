@@ -8,9 +8,11 @@ from marshmallow import ValidationError
 from dotenv import load_dotenv
 from flask_jwt_extended import jwt_required
 
-from ...schema import BlogItemSchema, CommentItemSchema, CreateCommentSchema, CreateBlogSchema
-from ...models import Blog, db, Comment
+from ...schema import BlogItemSchema, CreateBlogSchema
+from ...models import Blog, db, User
 
+
+# FIXME use marshmello.post_dump instead to make the code more cleaner srsly
 
 load_dotenv()
 SERVER_URL = os.getenv('SERVER_URL')
@@ -40,7 +42,6 @@ class BlogItemResource(Resource):
         if blogneeded:
             blog_schema = BlogItemSchema()
             blog_dict = blog_schema.dump(blogneeded)
-            blog_dict['comments_url'] = '{0}/blogs/{1}/comments'.format(SERVER_URL, blog_dict['id'])
             return blog_dict
         else:
             abort(404, 'Not Found')

@@ -9,7 +9,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models import Blog, User, Comment
 from app import db
 
-# TODO Update fake data to existing database schema and save in database
 
 def generate_random_ingredients():
     with open('app/data.txt', 'r') as ingredients_file:
@@ -26,7 +25,7 @@ def generate_random_blog_id():
 def generate_fake_blogs():
     f = Faker()
     count = 0
-    while count < 1000:
+    while count < 150:
         content = f.paragraphs(nb = random.choice([3,4,5,6,7,8,9,10]))
 
         blog_to_add = Blog(
@@ -72,7 +71,7 @@ def generate_fake_comments():
 
     f = Faker()
     count = 0
-    while count < 2000:
+    while count < 500:
 
         comment_to_add = Comment(id = str(uuid.uuid4()), message = f.sentence(nb_words = 12, variable_nb_words = True), date_written = f.date_time_this_year(before_now=True, after_now=False, tzinfo=None), blog_id = generate_random_blog_id(), author_id = generate_random_user_id())
 
@@ -85,6 +84,22 @@ def generate_fake_comments():
             db.session.rollback()
             print(error._message())
             continue
+
+
+def update_fake_followers(user : User):
+    
+    #* Generate a random number of followers
+    rand_num = random.randrange(1, 150)
+
+    for i in range(rand_num):
+        random_user = generate_random_user_id()
+        user.add_follower(random_user)
+        db.session.commit()
+
+        
+
+def update_everybody():
+    [update_fake_followers(user) for user in User.query.all()]
 
 def update_comment_number():
     
